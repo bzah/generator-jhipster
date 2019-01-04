@@ -176,9 +176,10 @@ public class DatabaseConfiguration {
     public Object h2TCPServer() throws SQLException {
         String port = getValidPortForH2();
         log.debug("H2 database is available on port {}", port);
+        log.debug("The JDBC URL for H2 should be jdbc:h2:tcp://localhost:{}/{}", port, getH2AbsolutePath());
         return H2ConfigurationHelper.createServer(port);
     }
-	
+    
     private String getValidPortForH2() {
         int port = Integer.parseInt(env.getProperty("server.port"));
         if (port < 10000) {
@@ -192,6 +193,17 @@ public class DatabaseConfiguration {
         }
         return String.valueOf(port);
     }
+     
+    private String getH2AbsolutePath() throws IOException {
+        String relativePath = env
+            .getProperty("spring.datasource.url")
+            .split(":")[3]
+            .split(";")[0];
+        return new File(relativePath)
+            .getCanonicalPath()
+            .replaceAll("\\\\", "/"); // replace every backslash by a slash (for Windows)
+    }
+	
     <%_ } _%>
 <%_ } _%>
 <%_ if (databaseType === 'mongodb') { _%>
